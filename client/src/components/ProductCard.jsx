@@ -1,28 +1,36 @@
-// racfe builds a boiler template
 import { Box, Image, Text, Badge, Flex, IconButton, Skeleton } from '@chakra-ui/react';
 import { BiExpand } from 'react-icons/bi';
-import React from 'react';
+import React, { useState } from 'react';
 import { addToFavorites, removeFromFavorites } from '../redux/actions/productActions';
 import { useSelector, useDispatch } from 'react-redux';
 import { MdOutlineFavorite, MdOutlineFavoriteBorder } from 'react-icons/md';
+import { Link as ReactLink } from 'react-router-dom';
 
 const ProductCard = ({ product, loading }) => {
 	const dispatch = useDispatch();
 	const { favorites } = useSelector((state) => state.product);
+	const [isShown, setIsShown] = useState(false);
 
 	return (
-		<Skeleton isLoaded={!loading} _hover={{ size: 1.5 }}>
+		<Skeleton isLoaded={!loading}>
 			<Box
 				_hover={{ transform: 'scale(1.1)', transitionDuration: '0.5s' }}
 				borderWidth='1px'
 				overflow='hidden'
 				p='4'
 				shadow='md'>
-				<Image src={product.images[0]} fallbackSrc='hhtps://via.placeholder.com/' alt={product.name} height='200px' />
+				<Image
+					onMouseEnter={() => setIsShown(true)}
+					onMouseLeave={() => setIsShown(false)}
+					src={product.images[isShown && product.images.length === 2 ? 1 : 0]}
+					fallbackSrc='https://via.placeholder.com/150'
+					alt={product.name}
+					height='200px'
+				/>
 				{product.stock < 5 ? (
 					<Badge colorScheme='yellow'>only {product.stock} left</Badge>
 				) : product.stock < 1 ? (
-					<Badge colorScheme='red'>Sold Out</Badge>
+					<Badge colorScheme='red'>Sold out</Badge>
 				) : (
 					<Badge colorScheme='green'>In Stock</Badge>
 				)}
@@ -40,7 +48,7 @@ const ProductCard = ({ product, loading }) => {
 				<Flex justify='space-between' alignItems='center' mt='2'>
 					<Badge colorScheme='cyan'>{product.category}</Badge>
 					<Text fontSize='xl' fontWeight='semibold' color='cyan.600'>
-						{product.price}
+						${product.price}
 					</Text>
 				</Flex>
 				<Flex justify='space-between' mt='2'>
@@ -59,7 +67,14 @@ const ProductCard = ({ product, loading }) => {
 							onClick={() => dispatch(addToFavorites(product._id))}
 						/>
 					)}
-					<IconButton icon={<BiExpand size='20' />} colorScheme='cyan' size='sm' />
+
+					<IconButton
+						icon={<BiExpand size='20' />}
+						as={ReactLink}
+						to={`/product/${product._id}`}
+						colorScheme='cyan'
+						size='sm'
+					/>
 				</Flex>
 			</Box>
 		</Skeleton>
